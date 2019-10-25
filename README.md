@@ -1,4 +1,8 @@
 # sqs-polling
+[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)][license]
+
+[license]:https://github.com/ohke/sqs-polling/blob/master/LICENSE
+
 `sqs-polling` is simple AWS SQS daemon. The following is all.
 - Polls SQS at regular intervals.
 - Receives messages and executes your callback.
