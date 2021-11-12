@@ -1,0 +1,25 @@
+name: test
+
+on: push
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python: ['3.6', '3.7', '3.8']
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-python@v2
+        with:
+          python-version: ${{ matrix-python }}
+      - run: pip install pipenv
+      - uses: actions/cache@v2
+        id: cache-pipenv
+        with:
+          path: ~/.local/share/virtualenv
+          key: pipenv-${{ matrix-python }}-${{ hashFiles('**/Pipfile.lock') }}
+      - run: pipenv install -d
+        if: steps.cache-pipenv.outputs.cache-hit != 'true'
+      - run: pipenv run flake8 sqs_polling
+      - run: pipenv run pytest sqs_polling/tests
