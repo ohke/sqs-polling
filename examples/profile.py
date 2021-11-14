@@ -14,4 +14,6 @@ your_aws_profile = {
 
 queue_url = "https://sqs.us-west-2.amazonaws.com/ZZZZZZZZZZZZ/your-sqs"
 
-sqs_polling(queue_url=queue_url, callback=simple_callback, aws_profile_dict=your_aws_profile)
+sqs_polling(
+    queue_url=queue_url, callback=simple_callback, aws_profile_dict=your_aws_profile
+)

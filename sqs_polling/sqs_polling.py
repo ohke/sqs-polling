@@ -4,9 +4,17 @@ from typing import Callable, Union, Optional
 from concurrent.futures import ThreadPoolExecutor, ProcessPoolExecutor
 
 
-def sqs_polling(queue_url: str, callback: Callable[..., bool], callback_args: Union[list, tuple, dict, None] = None,
-                extract_body: bool = True, visibility_timeout: int = 300, interval_seconds: float = 1.0,
-                max_workers: int = 1, process_worker: bool = False, aws_profile_dict: Optional[dict] = None):
+def sqs_polling(
+    queue_url: str,
+    callback: Callable[..., bool],
+    callback_args: Union[list, tuple, dict, None] = None,
+    extract_body: bool = True,
+    visibility_timeout: int = 300,
+    interval_seconds: float = 1.0,
+    max_workers: int = 1,
+    process_worker: bool = False,
+    aws_profile_dict: Optional[dict] = None,
+):
     """
     Polls AWS SQS and executes your callback.
 
@@ -33,11 +41,22 @@ def sqs_polling(queue_url: str, callback: Callable[..., bool], callback_args: Un
     aws_profile_dict : None or dict, default None
         Additional AWS profile. (credentials, region, etc)
     """
-    with ProcessPoolExecutor(max_workers=max_workers) if process_worker \
-            else ThreadPoolExecutor(max_workers=max_workers) as executor:
+    with ProcessPoolExecutor(
+        max_workers=max_workers
+    ) if process_worker else ThreadPoolExecutor(max_workers=max_workers) as executor:
         loop = asyncio.get_event_loop()
-        loop.call_soon(_poll, loop, executor, callback, callback_args, aws_profile_dict, queue_url,
-                       extract_body, visibility_timeout, interval_seconds)
+        loop.call_soon(
+            _poll,
+            loop,
+            executor,
+            callback,
+            callback_args,
+            aws_profile_dict,
+            queue_url,
+            extract_body,
+            visibility_timeout,
+            interval_seconds,
+        )
         loop.run_forever()
         loop.close()
 
@@ -59,18 +78,45 @@ def _get_session(aws_profile_dict):
     return _session
 
 
-def _poll(loop, executor, callback, callback_args, aws_profile_dict, queue_url,
-          extract_body, visibility_timeout, interval_seconds):
+def _poll(
+    loop,
+    executor,
+    callback,
+    callback_args,
+    aws_profile_dict,
+    queue_url,
+    extract_body,
+    visibility_timeout,
+    interval_seconds,
+):
     sqs = _get_session(aws_profile_dict)
 
     messages = _receive(sqs, queue_url, visibility_timeout)
 
     if len(messages) > 0:
-        executor.submit(_execute, aws_profile_dict, queue_url, callback,
-                        callback_args, messages, extract_body)
+        executor.submit(
+            _execute,
+            aws_profile_dict,
+            queue_url,
+            callback,
+            callback_args,
+            messages,
+            extract_body,
+        )
 
-    loop.call_later(interval_seconds, _poll, loop, executor, callback, callback_args, aws_profile_dict,
-                    queue_url, extract_body, visibility_timeout, interval_seconds)
+    loop.call_later(
+        interval_seconds,
+        _poll,
+        loop,
+        executor,
+        callback,
+        callback_args,
+        aws_profile_dict,
+        queue_url,
+        extract_body,
+        visibility_timeout,
+        interval_seconds,
+    )
 
 
 def _receive(sqs, queue_url, visibility_timeout, max_number_of_messages=1):
@@ -88,7 +134,9 @@ def _receive(sqs, queue_url, visibility_timeout, max_number_of_messages=1):
     return messages
 
 
-def _execute(aws_profile_dict, queue_url, callback, callback_args, messages, extract_body):
+def _execute(
+    aws_profile_dict, queue_url, callback, callback_args, messages, extract_body
+):
     for message in messages:
         body = message["Body"] if extract_body else message
 
@@ -100,8 +148,12 @@ def _execute(aws_profile_dict, queue_url, callback, callback_args, messages, ext
             deletable = callback(body)
 
         if not isinstance(deletable, bool):
-            raise TypeError("`callback` function must return bool. (whether its message can be deleted)")
+            raise TypeError(
+                "`callback` function must return bool. (whether its message can be deleted)"
+            )
 
         if deletable:
             sqs = _get_session(aws_profile_dict)
-            sqs.delete_message(QueueUrl=queue_url, ReceiptHandle=message["ReceiptHandle"])
+            sqs.delete_message(
+                QueueUrl=queue_url, ReceiptHandle=message["ReceiptHandle"]
+            )

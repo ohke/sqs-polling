@@ -22,10 +22,10 @@ class TestSqsPolling(unittest.TestCase):
                     "content-type": "text/xml",
                     "content-length": "860",
                     "x-amzn-requestid": "66222d85-7321-7aa2-b21a-7ba1eb393a4a",
-                    "date": "Sat, 19 Oct 2019 04:49:28 GMT"
+                    "date": "Sat, 19 Oct 2019 04:49:28 GMT",
                 },
                 "RequestId": "d7aa8408-0fa8-5a29-8538-d22c900749c1",
-                "HTTPStatusCode": 200
+                "HTTPStatusCode": 200,
             }
         }
 
@@ -33,12 +33,14 @@ class TestSqsPolling(unittest.TestCase):
             messages = []
 
             for i in range(message_num):
-                messages.append({
-                    "ReceiptHandle": self._get_receipt_handle(i),
-                    "MD5OfBody": "1db65a6a0a818fd39655b95e34ada11d",
-                    "MessageId": "58da63b0-426b-4fda-9b47-64017fd441dd",
-                    "Body": self._get_body(i),
-                })
+                messages.append(
+                    {
+                        "ReceiptHandle": self._get_receipt_handle(i),
+                        "MD5OfBody": "1db65a6a0a818fd39655b95e34ada11d",
+                        "MessageId": "58da63b0-426b-4fda-9b47-64017fd441dd",
+                        "Body": self._get_body(i),
+                    }
+                )
 
             response["Messages"] = messages
 
@@ -75,8 +77,14 @@ class TestSqsPolling(unittest.TestCase):
         callback_mock = MagicMock(return_value=True)
 
         with patch("boto3.client", return_value=sqs_mock) as _:
-            _execute({}, self._get_queue_url(),
-                     callback_mock, None, self._get_responses(1)["Messages"], True)
+            _execute(
+                {},
+                self._get_queue_url(),
+                callback_mock,
+                None,
+                self._get_responses(1)["Messages"],
+                True,
+            )
 
         callback_mock.assert_called_once_with(self._get_body(0))
 
@@ -89,8 +97,14 @@ class TestSqsPolling(unittest.TestCase):
         callback_mock = MagicMock(return_value=False)
 
         with patch("boto3.client", return_value=sqs_mock) as _:
-            _execute(sqs_mock, self._get_queue_url(),
-                     callback_mock, None, self._get_responses(1)["Messages"], True)
+            _execute(
+                sqs_mock,
+                self._get_queue_url(),
+                callback_mock,
+                None,
+                self._get_responses(1)["Messages"],
+                True,
+            )
 
         callback_mock.assert_called_once_with(self._get_body(0))
 
@@ -101,8 +115,14 @@ class TestSqsPolling(unittest.TestCase):
         callback_mock = MagicMock(return_value=True)
 
         with patch("boto3.client", return_value=sqs_mock) as _:
-            _execute(sqs_mock, self._get_queue_url(), callback_mock,
-                     (1, "2"), self._get_responses(1)["Messages"], True)
+            _execute(
+                sqs_mock,
+                self._get_queue_url(),
+                callback_mock,
+                (1, "2"),
+                self._get_responses(1)["Messages"],
+                True,
+            )
 
         callback_mock.assert_called_once_with(self._get_body(0), *(1, "2"))
 
@@ -111,18 +131,32 @@ class TestSqsPolling(unittest.TestCase):
         callback_mock = MagicMock(return_value=True)
 
         with patch("boto3.client", return_value=sqs_mock) as _:
-            _execute(sqs_mock, self._get_queue_url(), callback_mock,
-                     {"key1": 1, "key2": "2"}, self._get_responses(1)["Messages"], True)
+            _execute(
+                sqs_mock,
+                self._get_queue_url(),
+                callback_mock,
+                {"key1": 1, "key2": "2"},
+                self._get_responses(1)["Messages"],
+                True,
+            )
 
-        callback_mock.assert_called_once_with(self._get_body(0), **{"key1": 1, "key2": "2"})
+        callback_mock.assert_called_once_with(
+            self._get_body(0), **{"key1": 1, "key2": "2"}
+        )
 
     def test_execute_with_whole(self):
         sqs_mock = MagicMock()
         callback_mock = MagicMock(return_value=True)
 
         with patch("boto3.client", return_value=sqs_mock) as _:
-            _execute(sqs_mock, self._get_queue_url(), callback_mock,
-                     None, self._get_responses(1)["Messages"], False)
+            _execute(
+                sqs_mock,
+                self._get_queue_url(),
+                callback_mock,
+                None,
+                self._get_responses(1)["Messages"],
+                False,
+            )
 
         callback_mock.assert_called_once_with(self._get_responses(1)["Messages"][0])
 
@@ -132,8 +166,14 @@ class TestSqsPolling(unittest.TestCase):
 
         try:
             with patch("boto3.client", return_value=sqs_mock) as _:
-                _execute(sqs_mock, self._get_queue_url(), callback_mock,
-                         None, self._get_responses(1)["Messages"], True)
+                _execute(
+                    sqs_mock,
+                    self._get_queue_url(),
+                    callback_mock,
+                    None,
+                    self._get_responses(1)["Messages"],
+                    True,
+                )
         except TypeError:
             assert True
         except:
