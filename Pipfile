@@ -10,6 +10,3 @@ boto3 = "*"
 black = "==21.10b0"
 flake8 = "*"
 pytest = "*"
-
-[requires]
-python_version = "3.8"
