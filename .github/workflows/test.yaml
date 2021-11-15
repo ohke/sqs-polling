@@ -2,6 +2,9 @@ name: test
 
 on: push
 
+env:
+  CACHE_VERSION: 1
+
 jobs:
   test:
     runs-on: ubuntu-latest
@@ -18,7 +21,7 @@ jobs:
         id: cache-pipenv
         with:
           path: ~/.local/share/virtualenv
-          key: pipenv-${{ matrix.python }}-${{ hashFiles('**/Pipfile.lock') }}
+          key: pipenv-${{ env.CACHE_VERSION }}-${{ matrix.python }}-${{ hashFiles('**/Pipfile.lock') }}
       - run: pipenv install -d --python ${{ matrix.python }}
         if: steps.cache-pipenv.outputs.cache-hit != 'true'
       - run: pipenv run flake8 sqs_polling
