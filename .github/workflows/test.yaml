@@ -19,7 +19,7 @@ jobs:
         with:
           path: ~/.local/share/virtualenv
           key: pipenv-${{ matrix.python }}-${{ hashFiles('**/Pipfile.lock') }}
-      - run: pipenv install -d
+      - run: pipenv install -d --python ${{ matrix.python }}
         if: steps.cache-pipenv.outputs.cache-hit != 'true'
       - run: pipenv run flake8 sqs_polling
       - run: pipenv run pytest sqs_polling/tests
