@@ -9,4 +9,5 @@ boto3 = "*"
 [dev-packages]
 black = "==21.10b0"
 flake8 = "*"
+pre-commit = "*"
 pytest = "*"
